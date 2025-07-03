@@ -1,0 +1,59 @@
+<html>
+	<head>
+		<script src="/socket.io/socket.io.js"></script>
+	</head>
+
+	<body>
+		<label for="">Message :</label>
+		<input type="text" id="msg" onkeyup="typing()">
+		<input type="submit" onclick="send()">
+	</body>
+	<script>
+		const socket = io.connect();
+
+// Ask for the user's name
+const userName = prompt("Enter your username:");
+
+// Listen for system messages (e.g., "You are connected")
+socket.on("systemMessage", (message) => {
+const p = document.createElement("p");
+p.innerText = message;
+document.body.append(p);
+});
+
+// Listen for new chat messages
+socket.on("newChatMessage", (data) => {
+const p = document.createElement("p");
+p.innerText = `${
+data.name
+}: ${
+data.msg
+}`;
+document.body.append(p);
+});
+
+// Listen for typing notifications
+socket.on("userTyping", (typingMessage) => {
+const p = document.createElement("p");
+p.innerText = typingMessage;
+document.body.append(p);
+});
+
+// Get message input field
+const messageInput = document.getElementById("msg");
+
+// Function to send a chat message
+function send() {
+socket.emit("newChatMessage", {
+name: userName,
+msg: messageInput.value
+});
+messageInput.value = ""; // Clear the input after sending
+}
+
+// Function to notify others that the user is typing
+function typing() {
+socket.emit("userTyping", `${userName} is typing...`);
+}
+	</script>
+</html>
